@@ -1,12 +1,37 @@
 import React, { useState } from "react";
-import GanarelModal from "./GanarelModal";
+import { toast } from "react-hot-toast";
+
+import axios from 'axios';
+import { UseUserInfo } from "../API/UserInfoAPI";
 
 const UserDataInput = () => {
-    const [selectItem,setSelectItem] = useState("Select your passion name")
+    const [selectItem,setSelectItem] = useState("Select your professionname")
     const [data,setData] = useState({});
+    const [userinfo,refetch] = UseUserInfo();
     const handleUserData =()=>{
-        const {name,accept} = data;
-        console.log(name,accept,selectItem);
+      const {name,accept} = data;
+      const userData = {
+        name , profession: selectItem
+      }
+        if(!name){
+            return toast.error("Please enter your name")
+          }
+         if(!accept){
+            return toast.error("Please check Agree with terms");
+           }
+           if(selectItem === "Select your professionname")
+           {
+              return toast.error("Please select your professionname")
+             }
+            console.log(name, selectItem);
+      axios.post("https://data-input-server.vercel.app/userdata",userData).then(res =>{
+        console.log(res.data.acknowledged)
+        if(res.data.acknowledged){
+          toast.success(`Successfully added ${name}`)
+          refetch()
+          sessionStorage.setItem("userdata", JSON.stringify(userData));
+        }
+      })
     }
   return (
     <div>
@@ -36,7 +61,7 @@ const UserDataInput = () => {
               type="text"
               disabled
               value={selectItem}
-              className="input input-bordered w-full my-2  "
+              className="input input-bordered w-full my-2 font-bold "
             />
             <div className="w-full h-[300px] overflow-scroll my-2 px-4">
             {/* Manufacturing  */}
@@ -405,7 +430,7 @@ Transport and Logistics
      className="btn btn-ghost bg-blue-300 my-5 w-full">Save</button>
         </div>
       </div>
-      <GanarelModal></GanarelModal>
+      
     </div>
   );
 };
